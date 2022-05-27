@@ -5,11 +5,15 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"main/internals/types"
 	"net/url"
 	"os"
 	"os/exec"
+	"regexp"
 	"runtime"
+	"strings"
+	"syscall"
 )
 
 var LogsText []string
@@ -58,35 +62,70 @@ func GetMaxHopsArg() string {
 }
 
 func Traceroute(href string) error {
-	tracerouteFunction := GetTracerouteFunction()
 	currentUrl, _ := url.Parse(href)
-	hopsArg := GetMaxHopsArg()
-	cm := exec.Command(tracerouteFunction, hopsArg, currentUrl.Host)
-	stdout, _ := cm.StdoutPipe()
-	stderr, _ := cm.StderrPipe()
-	err := cm.Start()
-	if err != nil {
-		LogsText = append(LogsText, fmt.Sprintf("%s", err)+"\n")
-		return err
-	}
-	stdoutScanner := bufio.NewScanner(stdout)
-	stderrScanner := bufio.NewScanner(stderr)
-	go func() {
-		for stderrScanner.Scan() {
-			LogsText = append(LogsText, stderrScanner.Text()+"\n")
-		}
-	}()
-	go func() {
-		for stdoutScanner.Scan() {
-			LogsText = append(LogsText, stdoutScanner.Text()+"\n")
-		}
-	}()
-	err = cm.Wait()
-	if err != nil {
-		LogsText = append(LogsText, fmt.Sprintf("%s", err)+"\n")
-		return err
-	}
 
+	if IsWindows() {
+		pattern := regexp.MustCompile(`[A-Z]\:\\Windows;`)
+		windowsPath := pattern.FindString(os.Getenv("PATH"))
+		windowsPath = strings.Replace(windowsPath, ";", "", 1)
+		cmdToRun := windowsPath + "\\System32\\TRACERT.EXE"
+		args := []string{"-h 30", currentUrl.Host}
+		procAttr := new(os.ProcAttr)
+		var stdout = os.NewFile(uintptr(syscall.Stdout), "/dev/stdout")
+		var stderr = os.NewFile(uintptr(syscall.Stdout), "/dev/stderr")
+		procAttr.Files = []*os.File{os.Stdin, stdout, stderr}
+		stdoutScanner := bufio.NewScanner(procAttr.Files[0])
+		stderrScanner := bufio.NewScanner(procAttr.Files[0])
+
+		go func() {
+			for stderrScanner.Scan() {
+				LogsText = append(LogsText, stderrScanner.Text()+"\n")
+			}
+		}()
+		go func() {
+			for stdoutScanner.Scan() {
+				LogsText = append(LogsText, stdoutScanner.Text()+"\n")
+			}
+		}()
+
+		if process, err := os.StartProcess(cmdToRun, args, procAttr); err != nil {
+			log.Fatal("ERROR Unable to run %s: %s\n", cmdToRun, err.Error())
+		} else {
+
+			log.Fatal("%s running as pid %d\n", cmdToRun, process.Pid)
+		}
+	} else {
+		tracerouteFunction := GetTracerouteFunction()
+		hopsArg := GetMaxHopsArg()
+		cm := exec.Command(tracerouteFunction, hopsArg, currentUrl.Host)
+		stdout, _ := cm.StdoutPipe()
+		stderr, _ := cm.StderrPipe()
+		err := cm.Start()
+		if err != nil {
+			LogsText = append(LogsText, fmt.Sprintf("%s", err)+"\n")
+			log.Fatal(err)
+			return err
+		}
+		stdoutScanner := bufio.NewScanner(stdout)
+		stderrScanner := bufio.NewScanner(stderr)
+		go func() {
+			for stderrScanner.Scan() {
+				LogsText = append(LogsText, stderrScanner.Text()+"\n")
+			}
+		}()
+		go func() {
+			for stdoutScanner.Scan() {
+				LogsText = append(LogsText, stdoutScanner.Text()+"\n")
+			}
+		}()
+		err = cm.Wait()
+		if err != nil {
+			LogsText = append(LogsText, fmt.Sprintf("%s", err)+"\n")
+			log.Fatal(err)
+			return err
+		}
+
+	}
 	return nil
 }
 
@@ -101,6 +140,6 @@ func SaveLogs() {
 
 	err := ioutil.WriteFile("network-diagnostic-tool.log", bytesArr, 0644)
 	if err != nil {
-		panic(err)
+		log.Panic(err)
 	}
 }
