@@ -11,9 +11,10 @@ import (
 )
 
 func TestGetEnvShouldReturnENVOrFallback(t *testing.T) {
-	envVar := GetEnv("GOPATH", "")
+	os.Setenv("TEST_ENV", "Test variable")
+	envVar := GetEnv("TEST_ENV", "")
 	if envVar == "" {
-		t.Fatalf(`ENV should be not empty, because GOPATH is defined`)
+		t.Fatalf(`ENV should be not empty, because GOOS is defined`)
 	}
 	envVar = GetEnv("DOESNT_EXIST", "fallback")
 	if envVar != "fallback" {
