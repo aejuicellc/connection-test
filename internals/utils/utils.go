@@ -12,6 +12,7 @@ import (
 	"os/exec"
 	"regexp"
 	"runtime"
+	"strconv"
 	"strings"
 	"syscall"
 )
@@ -89,10 +90,9 @@ func Traceroute(href string) error {
 		}()
 
 		if process, err := os.StartProcess(cmdToRun, args, procAttr); err != nil {
-			log.Fatal("ERROR Unable to run %s: %s\n", cmdToRun, err.Error())
+			log.Fatal("ERROR Unable to run: \n", cmdToRun, err.Error())
 		} else {
-
-			log.Fatal("%s running as pid %d\n", cmdToRun, process.Pid)
+			LogsText = append(LogsText, "Running as pid \n"+strconv.Itoa(process.Pid))
 		}
 	} else {
 		tracerouteFunction := GetTracerouteFunction()
