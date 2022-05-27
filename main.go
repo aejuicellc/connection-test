@@ -6,10 +6,19 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
+	"github.com/getsentry/sentry-go"
+	"log"
 	"main/internals/ui"
+	"main/internals/utils"
 )
 
 func main() {
+	err := sentry.Init(sentry.ClientOptions{
+		Dsn: utils.GetEnv("SENTRY_DSN", ""),
+	})
+	if err != nil {
+		log.Panic(err)
+	}
 	application := app.New()
 	currentWindow := application.NewWindow("AEJuice Network Diagnostics Tool")
 	currentWindow.Resize(fyne.Size{

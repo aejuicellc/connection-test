@@ -4,7 +4,7 @@ go 1.17
 
 require (
 	fyne.io/fyne/v2 v2.1.4
-	github.com/go-cmd/cmd v1.4.1
+	github.com/getsentry/sentry-go v0.13.0
 )
 
 require (
@@ -21,8 +21,8 @@ require (
 	github.com/stretchr/testify v1.5.1 // indirect
 	github.com/yuin/goldmark v1.3.8 // indirect
 	golang.org/x/image v0.0.0-20200430140353-33d19683fad8 // indirect
-	golang.org/x/net v0.0.0-20210405180319-a5a99cb37ef4 // indirect
-	golang.org/x/sys v0.0.0-20210630005230-0f9fa26af87c // indirect
-	golang.org/x/text v0.3.3 // indirect
+	golang.org/x/net v0.0.0-20211008194852-3b03d305991f // indirect
+	golang.org/x/sys v0.0.0-20211007075335-d3039528d8ac // indirect
+	golang.org/x/text v0.3.7 // indirect
 	gopkg.in/yaml.v2 v2.2.8 // indirect
 )
