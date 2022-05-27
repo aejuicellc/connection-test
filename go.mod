@@ -2,7 +2,10 @@ module main
 
 go 1.17
 
-require fyne.io/fyne/v2 v2.1.4
+require (
+	fyne.io/fyne/v2 v2.1.4
+	github.com/go-cmd/cmd v1.4.1
+)
 
 require (
 	github.com/davecgh/go-spew v1.1.1 // indirect

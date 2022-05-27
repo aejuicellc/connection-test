@@ -7,26 +7,41 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
 	"main/internals/utils"
+	"sync"
 )
 
-func BuildMainContainer(topLevelCanvas *fyne.Container, progressBar *widget.ProgressBar) {
+func BuildMainContainer(topLevelCanvas *fyne.Container, progressBar *widget.ProgressBar, app fyne.App) {
+	var mutex sync.Mutex
+	saveLogsButton := widget.NewButton("Save Logs", utils.SaveLogs)
+	status := "hidden"
+	showLogsButton := widget.NewButton("Show Logs", func() {
+		if status == "hidden" {
+			status = "visible"
+			logsWindow := CreateLogsWindow(app)
+			logsWindow.Show()
+			logsWindow.SetOnClosed(func() {
+				status = "hidden"
+			})
+		}
+	})
+
 	for _, value := range utils.LinksToCheck {
 		grid := container.New(layout.NewGridLayout(2))
 		topLevelCanvas.Add(grid)
-		nameWidget := createLabelWithStringData(value.Name)
-		statusWidget := createLabelWithStringData("...")
+		nameWidget := CreateLabelWithStringData(value.Name)
+		statusWidget := CreateLabelWithStringData("...")
 		statusWidget.Alignment = fyne.TextAlignTrailing
-
-		go BuildStatusColumn(value, grid, statusWidget, progressBar)
+		go BuildStatusColumn(value, grid, statusWidget, progressBar, &mutex)
 
 		grid.Add(nameWidget)
 		grid.Add(statusWidget)
 	}
+	topLevelCanvas.Add(saveLogsButton)
+	topLevelCanvas.Add(showLogsButton)
 }
 
-func createLabelWithStringData(value string) *widget.Label {
+func CreateLabelWithStringData(value string) *widget.Label {
 	str := binding.NewString()
 	str.Set(value)
-
 	return widget.NewLabelWithData(str)
 }

@@ -1,12 +1,18 @@
 package utils
 
 import (
+	"bufio"
 	"encoding/json"
-	"fyne.io/fyne/v2/widget"
+	"fmt"
+	"io/ioutil"
 	"main/internals/types"
+	"net/url"
 	"os"
+	"os/exec"
+	"runtime"
 )
 
+var LogsText []string
 var LinksToCheck = GetLinksToCheck()
 var ProgressBarValue = 0.0
 
@@ -31,7 +37,70 @@ func IncrementProgressValue() {
 	ProgressBarValue = ProgressBarValue + floatLength
 }
 
-func IncrementProgress(progressBar *widget.ProgressBar) {
-	IncrementProgressValue()
-	progressBar.SetValue(ProgressBarValue)
+func IsWindows() bool {
+	return runtime.GOOS == "windows"
+}
+
+func GetTracerouteFunction() string {
+	if IsWindows() {
+		return "tracert"
+	}
+
+	return "traceroute"
+}
+
+func GetMaxHopsArg() string {
+	if IsWindows() {
+		return "-h 30"
+	}
+
+	return "-m30"
+}
+
+func Traceroute(href string) error {
+	tracerouteFunction := GetTracerouteFunction()
+	currentUrl, _ := url.Parse(href)
+	hopsArg := GetMaxHopsArg()
+	cm := exec.Command(tracerouteFunction, hopsArg, currentUrl.Host)
+	stdout, _ := cm.StdoutPipe()
+	stderr, _ := cm.StderrPipe()
+	err := cm.Start()
+	if err != nil {
+		LogsText = append(LogsText, fmt.Sprintf("%s", err)+"\n")
+		return err
+	}
+	stdoutScanner := bufio.NewScanner(stdout)
+	stderrScanner := bufio.NewScanner(stderr)
+	go func() {
+		for stderrScanner.Scan() {
+			LogsText = append(LogsText, stderrScanner.Text()+"\n")
+		}
+	}()
+	go func() {
+		for stdoutScanner.Scan() {
+			LogsText = append(LogsText, stdoutScanner.Text()+"\n")
+		}
+	}()
+	err = cm.Wait()
+	if err != nil {
+		LogsText = append(LogsText, fmt.Sprintf("%s", err)+"\n")
+		return err
+	}
+
+	return nil
+}
+
+func SaveLogs() {
+	var bytesArr []byte
+	for i := 0; i < len(LogsText); i++ {
+		b := []byte(LogsText[i])
+		for j := 0; j < len(b); j++ {
+			bytesArr = append(bytesArr, b[j])
+		}
+	}
+
+	err := ioutil.WriteFile("network-diagnostic-tool.log", bytesArr, 0644)
+	if err != nil {
+		panic(err)
+	}
 }
