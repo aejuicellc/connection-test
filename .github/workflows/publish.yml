@@ -1,4 +1,5 @@
 name: Publish new release
+on: push
 jobs:
   test:
     strategy:
