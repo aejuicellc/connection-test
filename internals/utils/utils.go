@@ -23,7 +23,7 @@ var ProgressBarValue = 0.0
 
 func GetLinksToCheck() []types.LinkToCheck {
 	links := make([]types.LinkToCheck, 0)
-	sources := GetEnv("URLS_TO_CHECK", "[{\"url\": \"https://aejuice.com\", \"name\": \"Website and API\"},{\"url\": \"https://nyc3.digitaloceanspaces.com/aejuice/update/updater/version.txt?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=SSK2B4AURYVVYMUF75K3%2F20220524%2Fnyc3%2Fs3%2Faws4_request&X-Amz-Date=20220524T214003Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=8a9d408ac988642ffeb3021eb5447f3a423e96ea335aa6ad46ff63a66cb0a83d\", \"name\": \"Possibility to download files\"}]")
+	sources := GetEnv("URLS_TO_CHECK", "[\n    {\n        \"url\": \"https://aejuice.com\",\n        \"name\": \"Possibility to fetch site\"\n    },\n    {\n        \"url\": \"https://api-free.deepl.com\",\n        \"name\": \"Possibility to translate\"\n    },\n    {\n        \"url\": \"https://aejuice.atlassian.net\",\n        \"name\": \"Possibility to bug reporting #1\"\n    }, \n    {\n        \"url\": \"https://sentry.aejuice.xyz\",\n        \"name\": \"Possibility to bug reporting #2\"\n    },\n    {\n        \"url\": \"https://bitbucket.org\",\n        \"name\": \"Possibility to update\"\n    },\n    {\n        \"url\": \"https://github.com\",\n        \"name\": \"Possibility to download releases\"\n    },\n    {\n        \"url\": \"https://api.pexels.com\",\n        \"name\": \"Possibility to download from stock\"\n    },\n    {\n        \"url\": \"https://nyc3.digitaloceanspaces.com\",\n        \"name\": \"Possibility to download files #1\"\n    },\n    {\n        \"url\": \"https://packmanager.nyc3.digitaloceanspaces.com\",\n        \"name\": \"Possibility to download files #2\"\n    },\n    {\n        \"url\": \"https://aejuice.nyc3.digitaloceanspaces.com\",\n        \"name\": \"Possibility to download files #3\"\n    },\n    {\n        \"url\": \"https://storage.aejuice.xyz\",\n        \"name\": \"Possibility to download files #4\"\n    },\n    {\n        \"url\": \"https://pcdn.aejuice.com\",\n        \"name\": \"Possibility to download files #5\"\n    }\n]")
 	_ = json.Unmarshal([]byte(sources), &links)
 
 	return links
@@ -73,10 +73,10 @@ func Traceroute(href string) error {
 		args := []string{"-h 30", currentUrl.Host}
 		procAttr := new(os.ProcAttr)
 		var stdout = os.NewFile(uintptr(syscall.Stdout), "/dev/stdout")
-		var stderr = os.NewFile(uintptr(syscall.Stdout), "/dev/stderr")
+		var stderr = os.NewFile(uintptr(syscall.Stderr), "/dev/stderr")
 		procAttr.Files = []*os.File{os.Stdin, stdout, stderr}
-		stdoutScanner := bufio.NewScanner(procAttr.Files[0])
-		stderrScanner := bufio.NewScanner(procAttr.Files[0])
+		stdoutScanner := bufio.NewScanner(procAttr.Files[1])
+		stderrScanner := bufio.NewScanner(procAttr.Files[2])
 
 		go func() {
 			for stderrScanner.Scan() {
@@ -92,7 +92,7 @@ func Traceroute(href string) error {
 		if process, err := os.StartProcess(cmdToRun, args, procAttr); err != nil {
 			log.Fatal("ERROR Unable to run: \n", cmdToRun, err.Error())
 		} else {
-			LogsText = append(LogsText, "Running as pid \n"+strconv.Itoa(process.Pid))
+			LogsText = append(LogsText, "Running as pid "+strconv.Itoa(process.Pid))
 		}
 	} else {
 		tracerouteFunction := GetTracerouteFunction()
