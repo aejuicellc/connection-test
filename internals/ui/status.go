@@ -5,9 +5,9 @@ import (
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/canvas"
 	"fyne.io/fyne/v2/widget"
+	"github.com/aejuicellc/connection-test-tool/internals/types"
+	"github.com/aejuicellc/connection-test-tool/internals/utils"
 	"image/color"
-	"main/internals/types"
-	"main/internals/utils"
 	"net/http"
 	"sync"
 )

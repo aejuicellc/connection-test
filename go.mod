@@ -1,4 +1,4 @@
-module main
+module github.com/aejuicellc/connection-test-tool
 
 go 1.17
 

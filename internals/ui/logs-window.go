@@ -6,7 +6,7 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/data/binding"
 	"fyne.io/fyne/v2/widget"
-	"main/internals/utils"
+	"github.com/aejuicellc/connection-test-tool/internals/utils"
 	"time"
 )
 

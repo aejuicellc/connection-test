@@ -6,10 +6,10 @@ import (
 	"fyne.io/fyne/v2/container"
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/widget"
+	"github.com/aejuicellc/connection-test-tool/internals/ui"
+	"github.com/aejuicellc/connection-test-tool/internals/utils"
 	"github.com/getsentry/sentry-go"
 	"log"
-	"main/internals/ui"
-	"main/internals/utils"
 )
 
 func main() {
