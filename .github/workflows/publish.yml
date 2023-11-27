@@ -22,10 +22,9 @@ jobs:
         os: [ windows-latest ]
         goos: [ windows ]
         goarch: [ "386", amd64 ]
-    runs-on: ${{ matrix.os }}
+    runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v3
-
       - uses: wangyoucao577/go-release-action@v1.28
         with:
           github_token: ${{ secrets.GH_BUILD_AND_PUBLISH_TOKEN }}
@@ -37,7 +36,7 @@ jobs:
   releases-macos:
     needs: [ test ]
     name: Release Binary
-    runs-on: ${{ matrix.os }}
+    runs-on: "ubuntu-latest"
     strategy:
       matrix:
         os: [ macos-latest ]
